@@ -7,9 +7,18 @@ Ultra Display App
   <strong>Ultra Display v1.0</strong>
 </p>
 
-Screen previews:
-![Ultra Display Stats Screen](screenshots/ultra_display_screen/stats.jpg)
-![Ultra Display Spotify Screen](screenshots/ultra_display_screen/spotify.jpg)
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><strong>Статове</strong></td>
+      <td align="center"><strong>Статове + Spotify (if detected)</strong></td>
+    </tr>
+    <tr>
+      <td align="center"><img src="screenshots/ultra_display_screen/stats.jpg" alt="Ultra Display Stats Screen" /></td>
+      <td align="center"><img src="screenshots/ultra_display_screen/spotify.jpg" alt="Ultra Display Spotify Screen" /></td>
+    </tr>
+  </table>
+</div>
 
 Single user entry point:
 - `app.cmd`
@@ -89,14 +98,24 @@ Required device-side settings:
    - Delete all existing images from `/image/` (keep only `live.jpg`)
    - Disable image auto display
    - Save
-   - Screenshot:
-     ![SmallTV-Ultra Pictures tab - remove all other images](screenshots/smalltv_ultra_screenshots_setup/remove-all-other-images.png)
 2. `Settings` tab:
    - Enable only `3. Photo Album` (checked)
    - Disable all other theme auto-switch options
    - Save
-   - Screenshot:
-     ![SmallTV-Ultra Settings tab - leave only Photo Album](screenshots/smalltv_ultra_screenshots_setup/leave-only-photo-album.png)
+
+<div align="center">
+  <table>
+    <tr>
+      <td align="center"><strong>Pictures tab</strong></td>
+      <td align="center"><strong>Settings tab</strong></td>
+    </tr>
+    <tr>
+      <td align="center"><img src="screenshots/smalltv_ultra_screenshots_setup/remove-all-other-images.png" alt="SmallTV-Ultra Pictures tab - remove all other images" /></td>
+      <td align="center"><img src="screenshots/smalltv_ultra_screenshots_setup/leave-only-photo-album.png" alt="SmallTV-Ultra Settings tab - leave only Photo Album" /></td>
+    </tr>
+  </table>
+</div>
+
 3. Confirm file exists in picture manager:
    - `live.jpg` in current path `/image/`
    - If the display is not showing `live.jpg`, open `image.html`, find `live.jpg`, and press `SET`

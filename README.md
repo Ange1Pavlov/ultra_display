@@ -10,8 +10,8 @@ Ultra Display App
 <div align="center">
   <table>
     <tr>
-      <td align="center"><strong>Статове</strong></td>
-      <td align="center"><strong>Статове + Spotify (if detected)</strong></td>
+      <td align="center"><strong>PC Specs only</strong></td>
+      <td align="center"><strong>PC Specs + Spotify (if detected)</strong></td>
     </tr>
     <tr>
       <td align="center"><img src="screenshots/ultra_display_screen/stats.jpg" alt="Ultra Display Stats Screen" /></td>

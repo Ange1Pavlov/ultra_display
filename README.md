@@ -27,7 +27,7 @@ Project layout
 --------------
 - `app.cmd` - single launcher for end users
 - `secrets.json` - Spotify credentials
-- `frame.jpg` - current rendered frame
+- `frame.jpg` - current rendered frame (generated locally, git-ignored)
 - `logs\` - runtime logs and PID tracking
   - `logs\frame_debug.txt`
   - `logs\display-pids.json`
@@ -142,11 +142,26 @@ CPU/GPU temperature sources
 Current priority:
 1. GPU: `nvidia-smi` (NVIDIA)
 2. CPU: background `cpu-temp-agent.ps1` + `OpenHardwareMonitor` WMI
-3. CPU fallback: bundled `LibreHardwareMonitor` runtime (AMD/Intel)
+3. CPU fallback: `LibreHardwareMonitor` runtime (AMD/Intel)
 4. CPU fallback: WMI thermal zone
+
+External tools (not stored in this repo)
+----------------------------------------
+- LibreHardwareMonitor (official): `https://github.com/LibreHardwareMonitor/LibreHardwareMonitor/releases`
+- OpenHardwareMonitor (official): `https://openhardwaremonitor.org/downloads/`
+- NVIDIA `nvidia-smi` (comes with NVIDIA driver): `https://www.nvidia.com/Download/index.aspx`
+
+Install/update command for CPU monitor runtimes:
+```powershell
+powershell -ExecutionPolicy Bypass -File internal\scripts\install-tools.ps1
+```
+This command downloads the tools from their official sources into local runtime folders (`internal\tools\...`) without versioning the binaries in git.
 
 First run note (important)
 --------------------------
+- Third-party runtimes are installed automatically by `start-display.ps1`.
+- Manual install command (optional):
+  `powershell -ExecutionPolicy Bypass -File internal\scripts\install-tools.ps1`
 - On first start, Windows may ask to allow/approve the hardware monitor runtime.
 - You need to allow it once manually.
 - After that, it runs minimized in the background through `cpu-temp-agent.ps1`.
@@ -154,7 +169,7 @@ First run note (important)
 Troubleshooting
 ---------------
 - CPU agent writes cache to `cache\cpu_temp_agent.json`.
-- If agent cannot read CPU sensors from OHM WMI, app tries bundled LibreHardwareMonitor, then WMI.
+- If agent cannot read CPU sensors from OHM WMI, app tries LibreHardwareMonitor, then WMI.
 - GPU temperature/load is independent and stays on `nvidia-smi`.
 
 Settings tab

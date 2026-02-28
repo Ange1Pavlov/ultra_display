@@ -3,11 +3,18 @@ $ErrorActionPreference = 'Stop'
 $scriptsRoot = Split-Path -Parent $MyInvocation.MyCommand.Definition
 $projectRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptsRoot '..\..'))
 $stopScript = Join-Path $scriptsRoot 'stop-display.ps1'
+$installToolsScript = Join-Path $scriptsRoot 'install-tools.ps1'
 $pidFile = Join-Path $projectRoot 'logs\display-pids.json'
 if (-not (Test-Path (Split-Path -Parent $pidFile))) { New-Item -ItemType Directory -Path (Split-Path -Parent $pidFile) -Force | Out-Null }
 
 # Cleanly stop old project processes before starting new ones.
 & $stopScript -Quiet
+
+try {
+    & $installToolsScript -Quiet
+} catch {
+    Write-Host ("Warning: runtime tools install failed: {0}" -f $_.Exception.Message)
+}
 
 $genScript = Join-Path $projectRoot 'internal\src\generate-frame.ps1'
 $renderOnceScript = Join-Path $projectRoot 'internal\src\render-once.ps1'

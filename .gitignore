@@ -1,3 +1,8 @@
 secrets.json
 logs/
 cache/
+frame.jpg
+internal/tools/lhm_runtime/*
+!internal/tools/lhm_runtime/.gitkeep
+internal/tools/ohm_runtime/*
+!internal/tools/ohm_runtime/.gitkeep

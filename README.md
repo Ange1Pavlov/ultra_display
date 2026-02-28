@@ -1,9 +1,11 @@
 Ultra Display App
 ===========
 
-![Ultra Display v1.0](icon.png)
-
-Ultra Display v1.0
+<p align="center">
+  <img src="icon.png" alt="Ultra Display v1.0" width="150" height="150" />
+  <br />
+  <strong>Ultra Display v1.0</strong>
+</p>
 
 Screen previews:
 ![Ultra Display Stats Screen](screenshots/ultra_display_screen/stats.jpg)
@@ -21,8 +23,9 @@ The user should only start `app.cmd`. It opens the control UI with:
 - Recent log lines
 - `Settings` tab with style JSON editor (Apply Settings auto-restarts services)
 
-Dashboard UI:
-![Ultra Display Dashboard](screenshots/ultra_display_settings/dashboard.png)
+| Dashboard UI | Settings tab |
+| --- | --- |
+| Control panel for start/stop/restart, refresh, web preview, live frame preview and recent logs.<br><br>![Ultra Display Dashboard](screenshots/ultra_display_settings/dashboard.png) | Dedicated style sections for typography/colors, clock, CPU/RAM/GPU text + bars, spacing/background and Spotify box.<br><br>![Ultra Display Settings](screenshots/ultra_display_settings/settings.png) |
 
 Fancy launcher icon
 -------------------
@@ -186,17 +189,5 @@ Troubleshooting
 - CPU agent writes cache to `cache\cpu_temp_agent.json`.
 - If agent cannot read CPU sensors from OHM WMI, app tries LibreHardwareMonitor, then WMI.
 - GPU temperature/load is independent and stays on `nvidia-smi`.
-
-Settings tab
-------------
-`Settings` tab now has dedicated UI sections (no manual JSON editing needed):
-- Global typography/colors
-- Clock
-- CPU/RAM/GPU text + bars
-- Spacing/background effects
-- Spotify box
-
-Settings UI:
-![Ultra Display Settings](screenshots/ultra_display_settings/settings.png)
 
 `Apply Settings` saves values into `settings.json` (style object) in background and restarts services.

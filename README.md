@@ -1,6 +1,14 @@
 Ultra Display App
 ===========
 
+![Ultra Display v1.0](icon.png)
+
+Ultra Display v1.0
+
+Screen previews:
+![Ultra Display Stats Screen](screenshots/ultra_display_screen/stats.jpg)
+![Ultra Display Spotify Screen](screenshots/ultra_display_screen/spotify.jpg)
+
 Single user entry point:
 - `app.cmd`
 - Optional icon launcher: `create-shortcut.cmd` (creates `Ultra Display Panel.lnk`)
@@ -12,6 +20,9 @@ The user should only start `app.cmd`. It opens the control UI with:
 - Live frame preview
 - Recent log lines
 - `Settings` tab with style JSON editor (Apply Settings auto-restarts services)
+
+Dashboard UI:
+![Ultra Display Dashboard](screenshots/ultra_display_settings/dashboard.png)
 
 Fancy launcher icon
 -------------------
@@ -75,10 +86,14 @@ Required device-side settings:
    - Delete all existing images from `/image/` (keep only `live.jpg`)
    - Disable image auto display
    - Save
+   - Screenshot:
+     ![SmallTV-Ultra Pictures tab - remove all other images](screenshots/smalltv_ultra_screenshots_setup/remove-all-other-images.png)
 2. `Settings` tab:
    - Enable only `3. Photo Album` (checked)
    - Disable all other theme auto-switch options
    - Save
+   - Screenshot:
+     ![SmallTV-Ultra Settings tab - leave only Photo Album](screenshots/smalltv_ultra_screenshots_setup/leave-only-photo-album.png)
 3. Confirm file exists in picture manager:
    - `live.jpg` in current path `/image/`
    - If the display is not showing `live.jpg`, open `image.html`, find `live.jpg`, and press `SET`
@@ -180,5 +195,8 @@ Settings tab
 - CPU/RAM/GPU text + bars
 - Spacing/background effects
 - Spotify box
+
+Settings UI:
+![Ultra Display Settings](screenshots/ultra_display_settings/settings.png)
 
 `Apply Settings` saves values into `settings.json` (style object) in background and restarts services.

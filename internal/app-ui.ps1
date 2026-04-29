@@ -68,6 +68,38 @@ function Get-LocalIPv4 {
     return '127.0.0.1'
 }
 
+function Get-DefaultDeviceServerUrl {
+    return 'http://192.168.0.244/'
+}
+
+function Normalize-DeviceServerUrl {
+    param(
+        [string]$value,
+        [switch]$AllowDefaultOnEmpty
+    )
+
+    $raw = ([string]$value).Trim()
+    if ([string]::IsNullOrWhiteSpace($raw)) {
+        if ($AllowDefaultOnEmpty) { return Get-DefaultDeviceServerUrl }
+        return $null
+    }
+
+    if ($raw -notmatch '^[a-z][a-z0-9+\-.]*://') {
+        $raw = 'http://{0}' -f $raw
+    }
+
+    try {
+        $uri = [System.Uri]$raw
+        if (-not $uri.IsAbsoluteUri -or [string]::IsNullOrWhiteSpace($uri.Host)) { return $null }
+
+        $base = '{0}://{1}' -f $uri.Scheme, $uri.Host
+        if (-not $uri.IsDefaultPort) { $base += ':' + $uri.Port }
+        return ($base.TrimEnd('/') + '/')
+    } catch {
+        return $null
+    }
+}
+
 function Get-WebPreviewState {
     $obj = @{
         running = $false
@@ -116,7 +148,7 @@ function Load-PreviewImage {
 
 function Get-DefaultStyleSettings {
     return [ordered]@{
-        fontFamily = 'Segoe UI'
+        fontFamily = 'Roboto'
         textColor = '#D3D3D3'
         bgColor = '#000000'
 
@@ -169,6 +201,7 @@ function Convert-StyleToObject {
 function Load-AppSettings {
     $obj = @{
         clockStyle = 'sevenseg'
+        deviceServerUrl = Get-DefaultDeviceServerUrl
         backgroundImage = '\\chroma\home\Drive\docs\pexels-dexter-fernandes-2646237.jpg'
         refreshIntervalSeconds = 2
         style = Get-DefaultStyleSettings
@@ -177,6 +210,10 @@ function Load-AppSettings {
         if (Test-Path $settingsPath) {
             $s = Get-Content -Path $settingsPath -Raw | ConvertFrom-Json
             if ($s.clockStyle) { $obj.clockStyle = ([string]$s.clockStyle).Trim().ToLowerInvariant() }
+            if ($null -ne $s.PSObject.Properties['deviceServerUrl']) {
+                $normalizedUrl = Normalize-DeviceServerUrl -value ([string]$s.deviceServerUrl) -AllowDefaultOnEmpty
+                if ($normalizedUrl) { $obj.deviceServerUrl = $normalizedUrl }
+            }
             if ($s.backgroundImage) { $obj.backgroundImage = ([string]$s.backgroundImage).Trim() }
             if ($s.refreshIntervalSeconds) {
                 $v = [int]$s.refreshIntervalSeconds
@@ -194,6 +231,7 @@ function Load-AppSettings {
 function Save-AppSettings {
     param(
         [string]$style,
+        [string]$deviceServerUrl,
         [string]$backgroundImage,
         [int]$refreshIntervalSeconds,
         $styleObject
@@ -208,6 +246,8 @@ function Save-AppSettings {
     if (-not [string]::IsNullOrWhiteSpace($backgroundImage)) {
         try { $bg = [System.IO.Path]::GetFullPath($backgroundImage.Trim()) } catch { $bg = $backgroundImage.Trim() }
     }
+    $serverUrl = Normalize-DeviceServerUrl -value $deviceServerUrl -AllowDefaultOnEmpty
+    if (-not $serverUrl) { $serverUrl = Get-DefaultDeviceServerUrl }
 
     $styleHash = Convert-StyleToObject $styleObject
     if ($refreshIntervalSeconds -lt 2) { $refreshIntervalSeconds = 2 }
@@ -215,6 +255,7 @@ function Save-AppSettings {
 
     $obj = [ordered]@{
         clockStyle = $normalized
+        deviceServerUrl = $serverUrl
         backgroundImage = $bg
         refreshIntervalSeconds = $refreshIntervalSeconds
         style = $styleHash
@@ -780,6 +821,22 @@ function Update-SettingsHeaderLayout {
 $fullW = 910
 $currentY = 8
 
+$grpDevice = New-SettingGroup 'Connection and Upload' 8 $currentY $fullW 86
+$grpDevice.Controls.Add((New-SettingLabel 'Device URL' 12 30 82))
+$txtDeviceUrl = New-Object System.Windows.Forms.TextBox
+$txtDeviceUrl.Location = New-Object System.Drawing.Point(96, 28)
+$txtDeviceUrl.Size = New-Object System.Drawing.Size(326, 24)
+Apply-DarkTextBox $txtDeviceUrl
+$grpDevice.Controls.Add($txtDeviceUrl)
+$lblDeviceHint = New-Object System.Windows.Forms.Label
+$lblDeviceHint.Text = 'Example: http://192.168.0.244/'
+$lblDeviceHint.Location = New-Object System.Drawing.Point(436, 30)
+$lblDeviceHint.Size = New-Object System.Drawing.Size(250, 22)
+$lblDeviceHint.ForeColor = [System.Drawing.Color]::FromArgb(160, 170, 186)
+$grpDevice.Controls.Add($lblDeviceHint)
+$settingsScroll.Controls.Add($grpDevice)
+$currentY += 98
+
 $grpGlobal = New-SettingGroup 'Typography and Global Colors' 8 $currentY $fullW 90
 $grpGlobal.Controls.Add((New-SettingLabel 'Font Family' 12 30 88))
 $grpGlobal.Controls.Add((New-SettingText 'fontFamily' 102 30 'Segoe UI'))
@@ -856,7 +913,7 @@ $btnResetStyle.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Wi
 $btnApplySettings.Anchor = [System.Windows.Forms.AnchorStyles]::Top -bor [System.Windows.Forms.AnchorStyles]::Right
 $btnApplySettings.BackColor = [System.Drawing.Color]::FromArgb(38, 92, 64)
 $btnApplySettings.FlatAppearance.BorderColor = [System.Drawing.Color]::FromArgb(56, 136, 96)
-$script:settingGroups = @($grpGlobal, $grpClock, $grpMetrics, $grpSpacing, $grpSpotify)
+$script:settingGroups = @($grpDevice, $grpGlobal, $grpClock, $grpMetrics, $grpSpacing, $grpSpotify)
 $settingsScroll.AutoScrollMinSize = New-Object System.Drawing.Size(980, ($grpSpotify.Bottom + 72))
 
 $tabSettings.Add_Resize({
@@ -955,6 +1012,13 @@ $btnApplySettings.Add_Click({
         'Classic Plain' { 'classic_plain' }
         default { 'sevenseg' }
     }
+    $deviceUrl = Normalize-DeviceServerUrl -value ([string]$txtDeviceUrl.Text) -AllowDefaultOnEmpty
+    if (-not $deviceUrl) {
+        [System.Windows.Forms.MessageBox]::Show("Enter a valid device URL or IP.`nExamples:`nhttp://192.168.0.244/`n192.168.0.244", 'Invalid Device URL', [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
+        return
+    }
+    $txtDeviceUrl.Text = $deviceUrl
+
     $bg = ([string]$txtBg.Text).Trim()
     if (-not [string]::IsNullOrWhiteSpace($bg) -and -not (Test-Path $bg)) {
         [System.Windows.Forms.MessageBox]::Show("Background file not found:`n$bg", 'Invalid Background', [System.Windows.Forms.MessageBoxButtons]::OK, [System.Windows.Forms.MessageBoxIcon]::Warning) | Out-Null
@@ -973,7 +1037,7 @@ $btnApplySettings.Add_Click({
     }
 
     $intervalSec = [int]$numRefreshInterval.Value
-    Save-AppSettings -style $styleName -backgroundImage $bg -refreshIntervalSeconds $intervalSec -styleObject $styleObj
+    Save-AppSettings -style $styleName -deviceServerUrl $deviceUrl -backgroundImage $bg -refreshIntervalSeconds $intervalSec -styleObject $styleObj
     Invoke-BypassFile -path $stopScript
     Invoke-BypassFile -path $startScript
     Show-ApplyLoader -seconds $intervalSec -title 'Applying Settings'
@@ -997,6 +1061,7 @@ $form.Add_Shown({
         'classic_plain' { $cmbClockStyle.SelectedItem = 'Classic Plain' }
         default { $cmbClockStyle.SelectedItem = 'Seven-seg' }
     }
+    $txtDeviceUrl.Text = $app.deviceServerUrl
     $txtBg.Text = $app.backgroundImage
     try { $numRefreshInterval.Value = [decimal]$app.refreshIntervalSeconds } catch { $numRefreshInterval.Value = [decimal]2 }
     foreach ($k in $styleControls.Keys) {

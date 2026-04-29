@@ -45,11 +45,27 @@ foreach ($proc in $procs) {
     }
 }
 
-# 3) Stop OHM runtime process from project path.
+# 3) Stop OHM runtime processes that belong to this project.
+$projectRootL = $projectRoot.ToLowerInvariant()
 $ohmProcs = Get-CimInstance Win32_Process -Filter "name = 'OpenHardwareMonitor.exe'"
 foreach ($p in $ohmProcs) {
-    $exe = ([string]$p.ExecutablePath).ToLowerInvariant()
-    if ($exe -eq $ohmExe) {
+    $exeRaw = [string]$p.ExecutablePath
+    $cmdRaw = [string]$p.CommandLine
+    $exe = if ($exeRaw) { $exeRaw.ToLowerInvariant() } else { '' }
+    $cmd = if ($cmdRaw) { $cmdRaw.ToLowerInvariant() } else { '' }
+
+    $belongsToProject = $false
+    if ($exe -and $exe -eq $ohmExe) {
+        $belongsToProject = $true
+    } elseif ($cmd -and ($cmd.Contains($ohmExe) -or $cmd.Contains($projectRootL))) {
+        $belongsToProject = $true
+    } elseif (-not $exe) {
+        # ExecutablePath can be empty for elevated processes; treat them as project-owned
+        # to avoid orphan OHM instances after restart.
+        $belongsToProject = $true
+    }
+
+    if ($belongsToProject) {
         Stop-Process -Id $p.ProcessId -Force -ErrorAction SilentlyContinue
     }
 }

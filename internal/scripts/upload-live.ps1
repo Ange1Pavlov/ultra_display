@@ -1,7 +1,7 @@
 # upload-live.ps1
 param(
     [string]$framePath = 'C:\display-test\frame.jpg',
-    [string]$uploadUrl = 'http://192.168.0.243/doUpload?dir=/image/',
+    [string]$uploadUrl = 'http://192.168.0.244/doUpload?dir=/image/',
     [string]$targetFilename = 'live.jpg',
     [int]$intervalSeconds = 2
 )

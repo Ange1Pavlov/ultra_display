@@ -23,6 +23,23 @@ $startedOhmPid = 0
 
 if (-not (Test-Path $cacheDir)) { New-Item -ItemType Directory -Path $cacheDir -Force | Out-Null }
 
+function Get-ExistingOhmProcess {
+    $all = Get-CimInstance Win32_Process -Filter "name='OpenHardwareMonitor.exe'" -ErrorAction SilentlyContinue
+    if (-not $all) { return $null }
+
+    $targetExe = $ohmExe.ToLowerInvariant()
+    foreach ($p in $all) {
+        $exe = [string]$p.ExecutablePath
+        if (-not $exe) { continue }
+        $exeL = $exe.ToLowerInvariant()
+        if ($exeL -eq $targetExe) { return $p }
+    }
+
+    # Fallback: when ExecutablePath is unavailable (common for elevated processes),
+    # attach to any existing OHM instance instead of launching another copy.
+    return $all | Select-Object -First 1
+}
+
 function Write-AgentCache {
     param($Temp, [string]$Source)
     $normalized = $null
@@ -70,9 +87,7 @@ try {
     Write-AgentCache -Temp $null -Source 'starting'
 
     if (Test-Path $ohmExe) {
-        $proc = Get-CimInstance Win32_Process -Filter "name='OpenHardwareMonitor.exe'" | Where-Object {
-            ([string]$_.ExecutablePath).ToLowerInvariant() -eq $ohmExe.ToLowerInvariant()
-        } | Select-Object -First 1
+        $proc = Get-ExistingOhmProcess
         if (-not $proc) {
             $p = Start-Process -FilePath $ohmExe -WorkingDirectory (Split-Path $ohmExe -Parent) -WindowStyle Hidden -PassThru
             $startedOhmPid = $p.Id

@@ -23,7 +23,34 @@ $cpuAgentScript = Join-Path $scriptsRoot 'cpu-temp-agent.ps1'
 $settingsPath = Join-Path $projectRoot 'settings.json'
 $framePath = Join-Path $projectRoot 'frame.jpg'
 
+function Get-DefaultDeviceServerUrl {
+    return 'http://192.168.0.244/'
+}
+
+function Normalize-DeviceServerUrl {
+    param([string]$value)
+
+    $raw = ([string]$value).Trim()
+    if ([string]::IsNullOrWhiteSpace($raw)) { return Get-DefaultDeviceServerUrl }
+
+    if ($raw -notmatch '^[a-z][a-z0-9+\-.]*://') {
+        $raw = 'http://{0}' -f $raw
+    }
+
+    try {
+        $uri = [System.Uri]$raw
+        if (-not $uri.IsAbsoluteUri -or [string]::IsNullOrWhiteSpace($uri.Host)) { return Get-DefaultDeviceServerUrl }
+
+        $base = '{0}://{1}' -f $uri.Scheme, $uri.Host
+        if (-not $uri.IsDefaultPort) { $base += ':' + $uri.Port }
+        return ($base.TrimEnd('/') + '/')
+    } catch {
+        return Get-DefaultDeviceServerUrl
+    }
+}
+
 $refreshIntervalSeconds = 2
+$deviceServerUrl = Get-DefaultDeviceServerUrl
 try {
     if (Test-Path $settingsPath) {
         $settings = Get-Content -Path $settingsPath -Raw | ConvertFrom-Json
@@ -31,8 +58,12 @@ try {
             $val = [int]$settings.refreshIntervalSeconds
             if ($val -ge 2 -and $val -le 120) { $refreshIntervalSeconds = $val }
         }
+        if ($null -ne $settings.PSObject.Properties['deviceServerUrl']) {
+            $deviceServerUrl = Normalize-DeviceServerUrl -value ([string]$settings.deviceServerUrl)
+        }
     }
 } catch { }
+$uploadUrl = '{0}doUpload?dir=/image/' -f $deviceServerUrl
 
 # Prevent stale frame flash on startup.
 Remove-Item -Path $framePath -Force -ErrorAction SilentlyContinue
@@ -61,6 +92,7 @@ $uploadProc = Start-Process -FilePath 'powershell' -ArgumentList @(
     '-NoProfile',
     '-ExecutionPolicy', 'Bypass',
     '-File', ('"{0}"' -f $uploadScript),
+    '-uploadUrl', ('"{0}"' -f $uploadUrl),
     '-intervalSeconds', $refreshIntervalSeconds
 ) -WindowStyle Hidden -WorkingDirectory $projectRoot -PassThru
 

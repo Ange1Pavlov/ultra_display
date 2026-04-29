@@ -1,5 +1,6 @@
 ﻿{
     "clockStyle":  "sevenseg",
+    "deviceServerUrl":  "http://192.168.0.244/",
     "backgroundImage":  "\\\\chroma\\home\\Drive\\docs\\pexels-dexter-fernandes-2646237.jpg",
     "refreshIntervalSeconds":  2,
     "style":  {
@@ -31,7 +32,7 @@
                   "spotifyLineHeight":  1,
                   "ramFontSize":  16,
                   "barBackgroundTransparencyPct":  100,
-                  "fontFamily":  "Roboto",
+                  "fontFamily":  "Segoe UI",
                   "gpuFontSize":  16,
                   "spotifyBgColor":  "#51F748",
                   "backgroundOverlayPct":  43,

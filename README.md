@@ -91,7 +91,7 @@ Known-compatible device info:
 - Compatibility note: works with `V9.0.45` and older versions
 
 Device web panel:
-- Open: `http://192.168.0.243/image.html` (replace IP with your device IP)
+- Open: `http://192.168.0.244/image.html` (replace IP with your device IP)
 
 Required device-side settings:
 1. `Pictures` tab:
@@ -209,4 +209,4 @@ Troubleshooting
 - If agent cannot read CPU sensors from OHM WMI, app tries LibreHardwareMonitor, then WMI.
 - GPU temperature/load is independent and stays on `nvidia-smi`.
 
-`Apply Settings` saves values into `settings.json` (style object) in background and restarts services.
+`Apply Settings` saves values into `settings.json` (including `deviceServerUrl` and style settings) in background and restarts services.
